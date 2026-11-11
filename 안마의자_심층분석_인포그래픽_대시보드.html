@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>안마의자 심층분석 | Executive Dashboard</title>
+<style>
+:root{
+  --bg:#000000; --panel:#0d0d0d; --card:#1a1a1a; --card2:#262626;
+  --text:#ffffff; --body:#bbbbbb; --muted:#7e7e7e; --line:#3c3c3c;
+  --blue1:#0066b1; --blue2:#1c69d4; --red:#e22718; --warn:#f4b400; --ok:#0fa336;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  line-height:1.55;
+}
+a{color:inherit;text-decoration:none}
+.container{width:min(1440px,92vw);margin:0 auto}
+.topbar{
+  position:sticky;top:0;z-index:50;background:rgba(0,0,0,.92);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)
+}
+.topbar .inner{height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{font-weight:800;letter-spacing:.08em;font-size:14px}
+.brand span{color:var(--body);font-weight:400;margin-left:10px}
+.nav{display:flex;gap:22px;font-size:12px;color:var(--body);letter-spacing:.06em;white-space:nowrap;overflow:auto}
+.nav a:hover{color:#fff}
+.mstripe{display:flex;height:4px;width:110px}
+.mstripe i{flex:1;display:block}
+.mstripe i:nth-child(1){background:var(--blue1)}
+.mstripe i:nth-child(2){background:var(--blue2)}
+.mstripe i:nth-child(3){background:var(--red)}
+.hero{min-height:78vh;display:grid;place-items:center;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+.hero:before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 82% 35%, rgba(28,105,212,.19), transparent 24%),
+    radial-gradient(circle at 70% 65%, rgba(226,39,24,.09), transparent 26%),
+    linear-gradient(120deg, transparent 0 48%, rgba(255,255,255,.035) 48% 49%, transparent 49% 100%);
+}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.35fr .65fr;gap:80px;align-items:end;padding:96px 0}
+.eyebrow{font-size:13px;font-weight:800;letter-spacing:.18em;color:var(--body)}
+.hero h1{font-size:clamp(58px,8vw,118px);line-height:.92;margin:18px 0 28px;font-weight:900;letter-spacing:-.04em}
+.hero p{font-size:18px;color:var(--body);max-width:760px}
+.hero-side{border-left:1px solid var(--line);padding-left:30px}
+.hero-side .big{font-size:46px;font-weight:800;line-height:1}
+.hero-side small{color:var(--muted)}
+.section{padding:92px 0;border-bottom:1px solid var(--line)}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:36px}
+.section-head h2{font-size:clamp(32px,4.2vw,58px);line-height:1.04;margin:0;font-weight:900;letter-spacing:-.03em}
+.section-head p{max-width:620px;color:var(--body);margin:0}
+.grid{display:grid;gap:18px}
+.kpis{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid #252525;padding:24px;min-height:160px}
+.card .label{font-size:12px;color:var(--muted);letter-spacing:.12em;font-weight:700}
+.card .value{font-size:36px;font-weight:900;margin:10px 0 6px}
+.card p{color:var(--body);margin:0}
+.accent-line{height:3px;background:linear-gradient(90deg,var(--blue1) 0 33%,var(--blue2) 33% 66%,var(--red) 66%);margin-bottom:14px}
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:28px}
+.panel{background:var(--panel);border:1px solid var(--line);padding:28px}
+.market-chart{height:330px;display:flex;align-items:end;gap:50px;padding:25px 30px 12px;border-left:1px solid var(--line);border-bottom:1px solid var(--line);position:relative}
+.market-chart .bar{width:30%;position:relative;background:linear-gradient(180deg,var(--blue2),var(--blue1));min-height:35px}
+.market-chart .bar.red{background:linear-gradient(180deg,var(--red),#9b1710)}
+.market-chart .bar span{position:absolute;top:-34px;width:100%;text-align:center;font-weight:800}
+.market-chart .bar em{position:absolute;bottom:-30px;width:100%;text-align:center;color:var(--body);font-style:normal}
+.market-chart .guide{position:absolute;left:0;right:0;border-top:1px dashed #333;color:var(--muted);font-size:11px}
+.market-chart .g1{bottom:25%}.market-chart .g2{bottom:50%}.market-chart .g3{bottom:75%}
+.cagr{display:grid;place-items:center;min-height:330px}
+.ring{width:220px;height:220px;border-radius:50%;display:grid;place-items:center;
+ background:conic-gradient(var(--red) 0 12.5%, #222 12.5% 100%);position:relative}
+.ring:after{content:"";position:absolute;inset:22px;border-radius:50%;background:var(--panel)}
+.ring .inside{position:relative;z-index:2;text-align:center}
+.ring strong{font-size:40px}.ring small{display:block;color:var(--muted)}
+.trends{grid-template-columns:repeat(3,1fr)}
+.trend-num{font-size:12px;color:var(--muted);font-weight:800}
+.trend-icon{width:56px;height:56px;margin:18px 0}
+.trend-icon svg{width:100%;height:100%;stroke:#fff;fill:none;stroke-width:1.6}
+.brand-grid{grid-template-columns:repeat(3,1fr)}
+.brand-card{position:relative;overflow:hidden}
+.brand-card:after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--blue1),var(--blue2),var(--red))}
+.brand-name{font-size:26px;font-weight:900}.brand-focus{color:#fff;margin-top:10px}.brand-view{color:var(--body);font-size:14px;margin-top:8px}
+.techflow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:stretch}
+.node{background:#111;border:1px solid var(--line);padding:20px;position:relative;min-height:135px}
+.node:not(:last-child):after{content:"→";position:absolute;right:-13px;top:44%;z-index:4;color:#fff;font-size:22px}
+.node b{display:block;margin-bottom:8px}.node span{color:var(--body);font-size:13px}
+.dd-grid{grid-template-columns:repeat(5,1fr)}
+.metric{background:var(--card);padding:22px;border-top:3px solid var(--blue2)}
+.metric:nth-child(2){border-color:var(--blue1)} .metric:nth-child(3){border-color:var(--red)}
+.metric:nth-child(4){border-color:var(--warn)} .metric:nth-child(5){border-color:var(--ok)}
+.metric .num{font-weight:900;color:var(--muted);font-size:12px}.metric h3{margin:10px 0 8px}.metric p{color:var(--body);font-size:14px;margin:0}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;position:relative}
+.study{background:var(--card);padding:24px;border-top:1px solid var(--line)}
+.study .year{font-size:44px;font-weight:900}.study .tag{color:var(--body);font-size:12px;letter-spacing:.08em}
+.study p{color:var(--body)}
+.safety{grid-template-columns:repeat(3,1fr)}
+.safety .card{min-height:230px}
+.safety .symbol{font-size:38px;margin-bottom:14px}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.product{border:1px solid var(--line);padding:20px;background:#0b0b0b}
+.product b{font-size:20px}.product .model{color:#fff;margin:8px 0}.product .position{color:var(--body);font-size:14px}
+.quad{position:relative;height:460px;border-left:1px solid var(--line);border-bottom:1px solid var(--line);
+ background:
+ linear-gradient(to right,transparent 49.8%,#222 50%,transparent 50.2%),
+ linear-gradient(to bottom,transparent 49.8%,#222 50%,transparent 50.2%)}
+.quad .axis-y{position:absolute;top:-30px;left:0;color:var(--body)}
+.quad .axis-x{position:absolute;right:0;bottom:-30px;color:var(--body)}
+.qitem{position:absolute;padding:10px 12px;border:1px solid var(--line);background:var(--card);font-size:13px}
+.cost-box{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.cost-hero{padding:34px;background:var(--card)}
+.cost-hero .money{font-size:64px;font-weight:900;line-height:1;margin:14px 0}
+.calc{background:var(--panel);border:1px solid var(--line);padding:26px}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+input{width:100%;background:#111;border:1px solid var(--line);color:#fff;padding:14px;font-family:inherit;font-size:18px}
+.calc-result{margin-top:18px;border-top:1px solid var(--line);padding-top:18px;font-size:34px;font-weight:900}
+.as-table{width:100%;border-collapse:collapse}
+.as-table th,.as-table td{border-bottom:1px solid var(--line);padding:16px;text-align:left;vertical-align:top}
+.as-table th{color:#fff;font-size:13px;letter-spacing:.06em}.as-table td{color:var(--body)}
+.checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.check{display:flex;gap:14px;padding:18px;background:var(--card);border:1px solid #2b2b2b;align-items:flex-start}
+.tick{width:26px;height:26px;border:1px solid var(--line);display:grid;place-items:center;flex:0 0 auto;color:var(--ok)}
+.biz{grid-template-columns:repeat(3,1fr)}
+.biz .card h3{font-size:28px;margin:6px 0 12px}.biz .card p{color:var(--body)}
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.phase{padding:26px;background:var(--card);border-top:4px solid var(--blue1)}
+.phase:nth-child(2){border-color:var(--blue2)} .phase:nth-child(3){border-color:var(--red)}
+.phase .days{font-size:13px;color:var(--muted);font-weight:800}.phase h3{font-size:30px;margin:10px 0}.phase p{color:var(--body)}
+.risks{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.risk{padding:20px;background:#111;border:1px solid var(--line)}
+.risk b{display:block;margin-bottom:8px}.risk span{font-size:13px;color:var(--body)}
+.sources{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.source{padding:20px;border:1px solid var(--line);background:var(--panel)}
+.source small{color:var(--muted)} .source p{color:var(--body);margin:6px 0 0}
+.footer{padding:48px 0;color:var(--muted);font-size:12px}
+.note{border-left:3px solid var(--warn);padding:14px 16px;background:#17130a;color:#ddd;font-size:13px;margin-top:22px}
+.badge{display:inline-block;border:1px solid var(--line);padding:5px 8px;font-size:11px;color:var(--body);letter-spacing:.08em}
+@media(max-width:980px){
+  .hero-grid,.split,.cost-box{grid-template-columns:1fr}
+  .kpis,.trends,.brand-grid,.safety,.products,.biz,.road{grid-template-columns:1fr 1fr}
+  .techflow,.dd-grid,.risks{grid-template-columns:1fr}
+  .node:not(:last-child):after{display:none}
+}
+@media(max-width:640px){
+  .nav{display:none}.hero-grid{padding:64px 0}
+  .kpis,.trends,.brand-grid,.safety,.products,.timeline,.biz,.road,.sources,.checklist{grid-template-columns:1fr}
+  .section{padding:64px 0}.section-head{display:block}.section-head p{margin-top:14px}
+  .cost-hero .money{font-size:48px}.input-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="container inner">
+    <div class="brand">MASSAGE CHAIR <span>EXECUTIVE DASHBOARD</span></div>
+    <nav class="nav">
+      <a href="#summary">SUMMARY</a><a href="#market">MARKET</a><a href="#brands">BRANDS</a>
+      <a href="#tech">TECH</a><a href="#safety">SAFETY</a><a href="#cost">COST</a><a href="#action">ACTION</a>
+    </nav>
+  </div>
+  <div class="mstripe"><i></i><i></i><i></i></div>
+</header>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">ANALYSIS / 2026</div>
+      <h1>MASSAGE<br>CHAIR</h1>
+      <p>안마의자 시장 · 기술 · 브랜드 심층 분석 — 경영진 의사결정용 인포그래픽 대시보드</p>
+    </div>
+    <div class="hero-side">
+      <div class="big">20 → 1</div>
+      <small>20장 분석자료를 하나의 인터랙티브 대시보드로 재구성</small>
+      <div style="margin-top:28px" class="badge">SOURCE-BASED / NO EXTRA CLAIMS</div>
+    </div>
+  </div>
+</section>
+
+<section id="summary" class="section">
+<div class="container">
+  <div class="section-head">
+    <h2>EXECUTIVE SUMMARY</h2>
+    <p>핵심 결론은 단순한 “기능 수” 경쟁보다 <b style="color:white">체험 품질·신체 적합성·총비용·A/S</b>가 구매 및 사업 판단에 함께 작용한다는 점이다.</p>
+  </div>
+  <div class="grid kpis">
+    <div class="card"><div class="label">MARKET</div><div class="value">↑</div><p>성장 전망은 긍정적이지만 조사 범위와 산출기관에 따라 수치 편차가 큼.</p></div>
+    <div class="card"><div class="label">PRODUCT</div><div class="value">FIT</div><p>마사지 메커니즘·체형 인식·리클라이닝 조합이 실제 만족도를 좌우.</p></div>
+    <div class="card"><div class="label">SERVICE</div><div class="value">TCO</div><p>월 렌탈료보다 계약 총액, 소유권, 중도해지, 이전설치 조건이 중요.</p></div>
+    <div class="card"><div class="label">DECISION RULE</div><div class="value">TEST</div><p>동일 조건 15분, 2인 이상 체형 교차 테스트가 권고됨.</p></div>
+  </div>
+</div>
+</section>
+
+<section id="market" class="section">
+<div class="container">
+  <div class="section-head">
+    <h2>MARKET OUTLOOK</h2>
+    <p>민간 시장조사 전망치는 성장성을 보여주지만 실적이 아니며, 정의·환율·방법론 확인이 필요하다.</p>
+  </div>
+  <div class="split">
+    <div class="panel">
+      <div class="accent-line"></div>
+      <div style="font-weight:800;margin-bottom:18px">South Korea Massage Chair Market — 전망 예시</div>
+      <div class="market-chart">
+        <div class="guide g1"></div><div class="guide g2"></div><div class="guide g3"></div>
+        <div class="bar" style="height:31%"><span>US$ 228M</span><em>2025</em></div>
+        <div class="bar red" style="height:100%"><span>US$ 740M</span><em>2035 전망</em></div>
+      </div>
+    </div>
+    <div class="panel cagr">
+      <div>
+        <div class="ring"><div class="inside"><strong>12.5%</strong><small>CAGR<br>2026–2035</small></div></div>
+        <div class="note">출처: Expert Market Research. 민간 예측치이며 실제 시장 실적과 동일하지 않음.</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid trends" style="margin-top:28px">
+    <div class="card"><div class="trend-num">TREND 01</div><div class="trend-icon"><svg viewBox="0 0 64 64"><path d="M12 48V22h40v26M18 22l6-8h16l6 8M24 48V34h16v14"/></svg></div><h3>프리미엄 기술</h3><p>로보틱스, 체형 감지, 독립 구동부, 개인별 프로그램.</p></div>
+    <div class="card"><div class="trend-num">TREND 02</div><div class="trend-icon"><svg viewBox="0 0 64 64"><path d="M10 46h44M16 46V26h32v20M22 26v-8h20v8"/></svg></div><h3>가구화 / 공간 절약</h3><p>인테리어 친화적 디자인과 소형 리클라이너형 제품 확대.</p></div>
+    <div class="card"><div class="trend-num">TREND 03</div><div class="trend-icon"><svg viewBox="0 0 64 64"><path d="M14 20h36v28H14zM20 14h24M20 28h24M20 36h16"/></svg></div><h3>구독·관리 서비스</h3><p>진입비용을 낮추는 렌탈과 장기 케어 결합. 계약 투명성 중요.</p></div>
+  </div>
+</div>
+</section>
+
+<section id="brands" class="section">
+<div class="container">
+  <div class="section-head"><h2>BRAND LANDSCAPE</h2><p>대표 제품 라인과 주력 메시지 기준의 정성 비교이며, 모든 모델에 일괄 적용되는 성능 서열은 아니다.</p></div>
+  <div class="grid brand-grid">
+    <div class="card brand-card"><div class="brand-name">바디프랜드</div><div class="brand-focus">로보틱스 · 프리미엄</div><div class="brand-view">구매 관점: 동작·마사지 기술 차별화</div></div>
+    <div class="card brand-card"><div class="brand-name">세라젬</div><div class="brand-focus">온열 · 휴식 · 헬스케어</div><div class="brand-view">구매 관점: 파우제/마스터 라인 확장</div></div>
+    <div class="card brand-card"><div class="brand-name">코웨이 BEREX</div><div class="brand-focus">구독 · 가구형 제품</div><div class="brand-view">구매 관점: 생활공간·서비스 연계</div></div>
+    <div class="card brand-card"><div class="brand-name">코지마</div><div class="brand-focus">폭넓은 가격대</div><div class="brand-view">구매 관점: 선택지·안마 중심 기능</div></div>
+    <div class="card brand-card"><div class="brand-name">휴테크</div><div class="brand-focus">마사지 · 디자인</div><div class="brand-view">구매 관점: 체험 및 중가 라인 다양화</div></div>
+    <div class="card brand-card"><div class="brand-name">Panasonic</div><div class="brand-focus">정밀 마사지 · 기술</div><div class="brand-view">구매 관점: 일본 내 체험·지원 체계</div></div>
+  </div>
+</div>
+</section>
+
+<section id="tech" class="section">
+<div class="container">
+  <div class="section-head"><h2>TECHNOLOGY STACK</h2><p>제어기·센서·액추에이터·HMI의 결합이 마사지 성능과 고장 모드를 결정한다. 아래는 특정 모델 회로가 아닌 일반화된 기능 블록이다.</p></div>
+  <div class="techflow">
+    <div class="node"><b>USER / HMI</b><span>리모컨 · 앱 · 음성</span></div>
+    <div class="node"><b>CONTROL</b><span>동작 시퀀스 · 개인화</span></div>
+    <div class="node"><b>SENSOR</b><span>체형 위치 · 안전 감지</span></div>
+    <div class="node"><b>DRIVE</b><span>롤러 · 모터 · 에어펌프</span></div>
+    <div class="node"><b>SERVICE</b><span>오류 로그 · 부품 교체</span></div>
+  </div>
+  <div class="section-head" style="margin-top:56px;margin-bottom:22px"><h2 style="font-size:34px">TECHNICAL DUE DILIGENCE</h2><p>“3D/4D/5D” 또는 “AI”라는 마케팅 용어보다 실제 동작과 검증 방식이 중요.</p></div>
+  <div class="grid dd-grid">
+    <div class="metric"><div class="num">01</div><h3>마사지 경로</h3><p>목·어깨·등·요추·둔부 실제 도달 범위</p></div>
+    <div class="metric"><div class="num">02</div><h3>강도 제어</h3><p>최저 강도의 편안함, 좌우 독립 제어</p></div>
+    <div class="metric"><div class="num">03</div><h3>체형 적합</h3><p>키·체중 허용 범위, 어깨 위치 감지</p></div>
+    <div class="metric"><div class="num">04</div><h3>정숙성</h3><p>모터·펌프 소음, 야간 사용 체감</p></div>
+    <div class="metric"><div class="num">05</div><h3>청소·내구</h3><p>시트 교체, 소모품, 작동부 수리 가능성</p></div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+  <div class="section-head"><h2>CLINICAL EVIDENCE</h2><p>통증·스트레스 관련 연구는 존재하지만 참여자·대조군·기간·평가 지표가 다르므로 의료 효능으로 일반화하면 안 된다.</p></div>
+  <div class="timeline">
+    <div class="study"><div class="tag">RCT</div><div class="year">2020</div><h3>요통 환자 연구</h3><p>안마의자와 기본 물리치료 비교 무작위 연구. 연구 설계 내에서 해석.</p><small>PMID 32195952</small></div>
+    <div class="study"><div class="tag">PILOT RCT</div><div class="year">2022</div><h3>스트레스 지표</h3><p>성인 스트레스 평가 파일럿 연구. 표본과 측정변수 고려 필요.</p><small>PMID 35339652</small></div>
+    <div class="study"><div class="tag">RCT</div><div class="year">2023</div><h3>목·어깨 통증</h3><p>사무직 대상 개입 연구. 모든 제품·질환에 동일 적용되는 결과 아님.</p><small>PMID 37767509</small></div>
+  </div>
+</div>
+</section>
+
+<section id="safety" class="section">
+<div class="container">
+  <div class="section-head"><h2>SAFETY & COMPLIANCE</h2><p>안전은 별도 평가 축이다. 온열·끼임·압박·전기적 위험과 사용자 상태별 주의사항을 확인해야 한다.</p></div>
+  <div class="grid safety">
+    <div class="card"><div class="symbol">⚙</div><h3>MECHANICAL</h3><p>끼임 / 과도한 압박. 관절 가동·승하차·발/팔 부위 구동부 움직임 고려.</p></div>
+    <div class="card"><div class="symbol">⚡</div><h3>ELECTRICAL</h3><p>감전 / 발열 / 리콜. 인증·리콜 여부와 제조사 안전 공지 확인.</p></div>
+    <div class="card"><div class="symbol">＋</div><h3>USER HEALTH</h3><p>골다공증, 임신, 수술 직후, 심혈관질환 등은 설명서 주의사항 및 전문가 상담.</p></div>
+  </div>
+  <div class="note">참고: 한국소비자원 안마의자 안전 사용 캠페인 (2023.11)</div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+  <div class="section-head"><h2>SELECTED PRODUCTS</h2><p>2026년 공개 제품 라인 기준의 예시이며, 가격·사양은 판매 시점과 구성에 따라 달라질 수 있다.</p></div>
+  <div class="products">
+    <div class="product"><b>바디프랜드</b><div class="model">733 / 다빈치 AI 프로</div><div class="position">로보틱스·프리미엄 구동</div></div>
+    <div class="product"><b>세라젬</b><div class="model">파우제 M4 / M8 Fit</div><div class="position">온열·컴팩트한 휴식</div></div>
+    <div class="product"><b>코웨이</b><div class="model">BEREX 페블체어2</div><div class="position">가구형·생활공간 접근</div></div>
+    <div class="product"><b>코지마</b><div class="model">카이저 엑스</div><div class="position">전통형 고기능 안마</div></div>
+    <div class="product"><b>휴테크</b><div class="model">AI 카라보</div><div class="position">디자인·프로그램 다양화</div></div>
+    <div class="product"><b>Panasonic</b><div class="model">EP-MA121</div><div class="position">정밀 마사지 기술</div></div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+  <div class="section-head"><h2>POSITIONING FRAME</h2><p>정량 순위가 아닌 구매 전 비교를 돕는 정성 프레임 — “기능 체감 × 공간 적합성”.</p></div>
+  <div class="quad">
+    <div class="axis-y">마사지 기능·정교함 ↑</div><div class="axis-x">공간 적합성 / 가구화 →</div>
+    <div class="qitem" style="left:15%;top:14%">풀사이즈 프리미엄</div>
+    <div class="qitem" style="right:12%;top:17%">컴팩트 프리미엄</div>
+    <div class="qitem" style="left:17%;bottom:16%">전통형 실속</div>
+    <div class="qitem" style="right:10%;bottom:18%">가구형 리클라이너</div>
+  </div>
+</div>
+</section>
+
+<section id="cost" class="section">
+<div class="container">
+  <div class="section-head"><h2>TOTAL COST</h2><p>가격은 “본체가”와 “계약 총액”을 분리해서 봐야 하며, 각 구매 옵션을 같은 기간으로 환산해야 한다.</p></div>
+  <div class="cost-box">
+    <div class="cost-hero">
+      <div class="label">공개 렌탈가 사례</div>
+      <div style="font-size:22px;margin-top:14px">월 196,000원 × 60개월</div>
+      <div class="money">11.76M</div>
+      <p style="color:var(--body)">총 1,176만 원 + 등록비 / 이전설치 / 소모품 / 중도해지 / 부가 서비스</p>
+    </div>
+    <div class="calc">
+      <div class="badge">INTERACTIVE CALCULATOR</div>
+      <h3>렌탈 총액 계산기</h3>
+      <div class="input-row">
+        <div><label>월 렌탈료 (원)</label><input id="monthly" type="number" value="196000"></div>
+        <div><label>계약 개월</label><input id="months" type="number" value="60"></div>
+      </div>
+      <div><label>추가 비용 합계 (원)</label><input id="extra" type="number" value="0"></div>
+      <div class="calc-result" id="result">₩11,760,000</div>
+      <p style="color:var(--muted);font-size:12px">계약별 소유권 이전, 중도해지, 설치·이전 조건은 별도 확인 필요.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+  <div class="section-head"><h2>AFTER-SALES SERVICE</h2><p>A/S는 브랜드가 아니라 “모델·계약” 단위로 품질보증·무상수리·소모품·출장지역을 구분해 확인해야 한다.</p></div>
+  <table class="as-table">
+    <thead><tr><th>브랜드</th><th>자료에 제시된 사례</th><th>확인 포인트</th></tr></thead>
+    <tbody>
+      <tr><td>바디프랜드</td><td>상품별 장기 케어 상품 존재</td><td>소모품·고객 과실 제외 범위</td></tr>
+      <tr><td>세라젬</td><td>일부 파우제 모델 5년 무상 A/S 안내</td><td>품질보증 기간과 구분 필요</td></tr>
+      <tr><td>코지마</td><td>제품 페이지에 12개월 보증 표기 사례</td><td>상품·구매처별 정책 확인</td></tr>
+      <tr><td>휴테크</td><td>일부 제품 1년 무상수리 표기</td><td>영업·다중 이용 시설 조건 상이</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+  <div class="section-head"><h2>BUYER VALIDATION</h2><p>15분 실물 체험 시 “가장 강한 마사지”가 아니라 반복 사용 가능한 최저 피로감을 찾는다.</p></div>
+  <div class="checklist">
+    <div class="check"><div class="tick">✓</div><div>목·어깨 롤러가 실제 원하는 위치에 닿는가?</div></div>
+    <div class="check"><div class="tick">✓</div><div>약한 강도에서도 불편하거나 아픈 지점은 없는가?</div></div>
+    <div class="check"><div class="tick">✓</div><div>발·종아리와 등 부분을 각각 조정할 수 있는가?</div></div>
+    <div class="check"><div class="tick">✓</div><div>체형과 키 변화에 따라 셋업이 안정적으로 맞는가?</div></div>
+    <div class="check"><div class="tick">✓</div><div>리클라이닝 동선과 문폭·바닥하중이 충분한가?</div></div>
+    <div class="check"><div class="tick">✓</div><div>가족 구성원별 체험 결과를 기록하고 재방문 비교했는가?</div></div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+  <div class="section-head"><h2>BUSINESS IMPLICATIONS</h2><p>B2C와 B2B는 운영·책임·보증 조건이 다르므로 동일한 수익모델로 보면 안 된다.</p></div>
+  <div class="grid biz">
+    <div class="card"><div class="label">B2C</div><h3>체험 → 전환</h3><p>장기계약·실내 적합·시트 유지보수·추천/재구매, 채널별 가격 일관성 점검.</p></div>
+    <div class="card"><div class="label">B2B</div><h3>가동률 → 유지보수</h3><p>설치·소독·관리비·고장 대응·운영자의 배상책임을 전제로 상품 설계.</p></div>
+    <div class="card"><div class="label">PARTNERSHIP</div><h3>서비스 설계</h3><p>하드웨어 마진뿐 아니라 정기점검·교체부품·현장 A/S의 경제성 검토.</p></div>
+  </div>
+</div>
+</section>
+
+<section id="action" class="section">
+<div class="container">
+  <div class="section-head"><h2>90-DAY ACTION PLAN</h2><p>제품 선택과 사업 검토 모두 현장 검증과 계약 조건 확인을 선행한다.</p></div>
+  <div class="road">
+    <div class="phase"><div class="days">0–30 DAYS</div><h3>쇼트리스트</h3><p>용도·예산별 3개 모델 선정, 실물 15분 테스트.</p></div>
+    <div class="phase"><div class="days">31–60 DAYS</div><h3>총비용 검증</h3><p>견적 3건, 설치·수리·해지·반품 조건 비교.</p></div>
+    <div class="phase"><div class="days">61–90 DAYS</div><h3>파일럿 판단</h3><p>고객/가족 만족도, 고장 대응, 실사용 빈도 평가.</p></div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+  <div class="section-head"><h2>RISK REGISTER</h2><p>가장 큰 분석 위험은 미검증 정보를 확정 사실처럼 사용하는 것이다.</p></div>
+  <div class="risks">
+    <div class="risk"><b>시장 수치</b><span>기관별 정의 상이. 전망치 간 단순 합산 금지.</span></div>
+    <div class="risk"><b>임상 효과</b><span>연구 대상·기간 한정. 질병 치료 효능으로 해석 금지.</span></div>
+    <div class="risk"><b>기술 성능</b><span>모델별 구현 차이. AI·4D 문구만으로 서열화 금지.</span></div>
+    <div class="risk"><b>가격/보증</b><span>시점·계약별 상이. 서면 견적/약관 재확인.</span></div>
+    <div class="risk"><b>기존 프롬프트</b><span>원문 미확인. 과거 요구를 추정하지 않음.</span></div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+  <div class="section-head"><h2>SOURCE NOTES</h2><p>주요 출처는 제조사 공식 정보, 국내 소비자 안전기관, 학술 데이터베이스, 시장조사기관이다.</p></div>
+  <div class="sources">
+    <div class="source"><small>MARKET</small><h3>Expert Market Research</h3><p>한국 안마의자 시장 전망</p></div>
+    <div class="source"><small>MARKET</small><h3>Grand View Research</h3><p>마사지 장비 시장 범위</p></div>
+    <div class="source"><small>PRODUCT</small><h3>6개 제조사 공식 홈페이지</h3><p>Bodyfriend · Ceragem · Coway BEREX · Cozyma · Hutech · Panasonic</p></div>
+    <div class="source"><small>SAFETY</small><h3>한국소비자원</h3><p>안마의자 안전사용 캠페인</p></div>
+    <div class="source"><small>EVIDENCE</small><h3>PubMed RCT</h3><p>PMID 32195952 · 35339652 · 37767509</p></div>
+  </div>
+  <div class="note">본 대시보드는 구매·사업 검토를 위한 정보이며 의학적 진단 또는 치료 권고가 아닙니다.</div>
+</div>
+</section>
+
+<footer class="footer"><div class="container">MASSAGE CHAIR / MARKET & TECHNOLOGY · 2026.11 · Noto Sans KR · dark executive dashboard</div></footer>
+
+<script>
+function calc(){
+ const m=Number(document.getElementById('monthly').value||0);
+ const n=Number(document.getElementById('months').value||0);
+ const e=Number(document.getElementById('extra').value||0);
+ const total=m*n+e;
+ document.getElementById('result').textContent='₩'+total.toLocaleString('ko-KR');
+}
+['monthly','months','extra'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>
